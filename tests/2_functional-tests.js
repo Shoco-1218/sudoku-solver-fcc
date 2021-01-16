@@ -9,7 +9,7 @@ suite('Functional Tests', () => {
 
   suite('Routing tests', function() {
     
-    suite("POST /api/solves => crate an object", function() {
+    suite("POST /api/solves => create an object", function() {
 
       test('Test POST /api/solve with valid puzzle string', function(done) {
         const input = 
@@ -84,12 +84,167 @@ suite('Functional Tests', () => {
           done();
         });
       });
-
     });
 
+    suite("POST /api/check => create an object", function() {
 
+      test('Test POST /api/check with all fields', function(done) {
+        const puzzle = 
+        '..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9......1945....4.37.4.3..6..';
+        const coordinate = 'A1';
+        const value = '7';
+        chai.request(server)
+        .post('/api/check')
+        .send({ puzzle: puzzle, coordinate: coordinate, value: value })
+        .end((err, res) => {
+          assert.equal(res.status, 200);
+          assert.isObject(res.body);
+          assert.property(res.body, 'valid');
+          assert.isBoolean(res.body.valid, true);
+          done();
+        });
+      });
 
+      test('Test with single placement confict', function(done) {
+        const puzzle = 
+        '..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9......1945....4.37.4.3..6..';
+        const coordinate = 'A1';
+        const value = '6';
+        chai.request(server)
+        .post('/api/check')
+        .send({ puzzle: puzzle, coordinate: coordinate, value: value })
+        .end((err, res) => {
+          assert.equal(res.status, 200);
+          assert.isObject(res.body);
+          assert.property(res.body, 'valid');
+          assert.isBoolean(res.body.valid, false);
+          assert.property(res.body, 'conflict');
+          assert.equal(res.body.conflict, 'column');
+          done();
+        });
+      });
 
+      test('Test with multiple placement confict', function(done) {
+        const puzzle = 
+        '..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9......1945....4.37.4.3..6..';
+        const coordinate = 'A1';
+        const value = '8';
+        chai.request(server)
+        .post('/api/check')
+        .send({ puzzle: puzzle, coordinate: coordinate, value: value })
+        .end((err, res) => {
+          assert.equal(res.status, 200);
+          assert.isObject(res.body);
+          assert.property(res.body, 'valid');
+          assert.isBoolean(res.body.valid, false);
+          assert.property(res.body, 'conflict');
+          assert.lengthOf(res.body.conflict, 2);
+          done();
+        });
+      });
+
+      test('Test with all placement confict', function(done) {
+        const puzzle = 
+        '..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9......1945....4.37.4.3..6..';
+        const coordinate = 'A1';
+        const value = '5';
+        chai.request(server)
+        .post('/api/check')
+        .send({ puzzle: puzzle, coordinate: coordinate, value: value })
+        .end((err, res) => {
+          assert.equal(res.status, 200);
+          assert.isObject(res.body);
+          assert.property(res.body, 'valid');
+          assert.isBoolean(res.body.valid, false);
+          assert.property(res.body, 'conflict');
+          assert.lengthOf(res.body.conflict, 3);
+          done();
+        });
+      });
+
+      test('Test with missing required fields', function(done) {
+        const puzzle = 
+        '..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9......1945....4.37.4.3..6..';
+        chai.request(server)
+        .post('/api/check')
+        .send({ puzzle: puzzle })
+        .end((err, res) => {
+          assert.equal(res.status, 200);
+          assert.isObject(res.body);
+          assert.property(res.body, 'error');
+          assert.equal(res.body.error, 'Required field missing');
+          done();
+        });
+      });
+
+      test('Test with invalid characters', function(done) {
+        const puzzle = 
+        'aa9..5.1.85.4....2432......1...69.83.9.....6.62.71...9......1945....4.37.4.3..6..';
+        const coordinate = 'A1';
+        const value = '7';
+        chai.request(server)
+        .post('/api/check')
+        .send({ puzzle: puzzle, coordinate: coordinate, value: value })
+        .end((err, res) => {
+          assert.equal(res.status, 200);
+          assert.isObject(res.body);
+          assert.property(res.body, 'error');
+          assert.equal(res.body.error, 'Invalid characters in puzzle');
+          done();
+        });
+      });
+
+      test('Test with incorrect length', function(done) {
+        const puzzle = 
+        '.9..5.1.85.4....2432......1...69.83.9.....6.62.71...9......1945....4.37.4.3..6..';
+        const coordinate = 'A1';
+        const value = '7';
+        chai.request(server)
+        .post('/api/check')
+        .send({ puzzle: puzzle, coordinate: coordinate, value: value })
+        .end((err, res) => {
+          assert.equal(res.status, 200);
+          assert.isObject(res.body);
+          assert.property(res.body, 'error');
+          assert.equal(res.body.error, 'Expected puzzle to be 81 characters long');
+          done();
+        });
+      });
+
+      test('Test with invalid placement coordinate', function(done) {
+        const puzzle = 
+        '..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9......1945....4.37.4.3..6..';
+        const coordinate = '11';
+        const value = '7';
+        chai.request(server)
+        .post('/api/check')
+        .send({ puzzle: puzzle, coordinate: coordinate, value: value })
+        .end((err, res) => {
+          assert.equal(res.status, 200);
+          assert.isObject(res.body);
+          assert.property(res.body, 'error');
+          assert.equal(res.body.error, 'Invalid coordinate');
+          done();
+        });
+      });
+
+      test('Test with invalid placement value', function(done) {
+        const puzzle = 
+        '..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9......1945....4.37.4.3..6..';
+        const coordinate = 'A1';
+        const value = 'A';
+        chai.request(server)
+        .post('/api/check')
+        .send({ puzzle: puzzle, coordinate: coordinate, value: value })
+        .end((err, res) => {
+          assert.equal(res.status, 200);
+          assert.isObject(res.body);
+          assert.property(res.body, 'error');
+          assert.equal(res.body.error, 'Invalid value');
+          done();
+        });
+      });
+    });
 
   });
 }); 

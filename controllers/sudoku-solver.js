@@ -1,7 +1,156 @@
-const puzzleData = require('./puzzle-strings').puzzlesAndSolutions;
 
 class SudokuSolver {
+
+  // Validation
+  validate(puzzleString) {
+    if(!puzzleString) {
+      return ({ result: false, message: 'Required field missing' });
+    };
+    if(puzzleString.length !== 81) {
+      return ({ result: false, message: 'Expected puzzle to be 81 characters long'});
+    };
+    const reg = /^[0-9\.]+$/;
+    if(!reg.test(puzzleString)) {
+      return ({ result: false, message: 'Invalid characters in puzzle'});
+    };
+    return ({ result: true });
+  };
+
+
+  // Recursive function to find the answer
+  converter(puzzle) {
+    
+    let array = [];
+    for(let i = 0; i < puzzle.length; i++) {
+      if(puzzle[i] == '.') {
+        let zero = parseInt(puzzle[i]);
+        zero = 0;
+        array.push(zero);
+      } else {
+        let int = parseInt(puzzle[i]);
+        array.push(int);
+      }
+    }
+    const solution = this.solve(array);
+    return (solution == null) 
+    ? ({ result: false, message: 'Puzzle cannot be solved' }) 
+    : ({ result: true, puzzle : solution.join('') });
+  };
   
+  solve(puzzle) {
+    if(this.checkEmpty(puzzle)) {
+      return puzzle;
+    } else {
+      let index = puzzle.indexOf(0);
+      for(let number= 1; number < 10; number++) {
+        let newPuzzle = [...puzzle];
+        newPuzzle[index] = number;
+        let validation = this.validateSection(newPuzzle, index);
+        if(!validation) {
+          continue;
+        } else {
+          let solution = this.solve(newPuzzle);
+          if(!solution) {
+            continue;
+          } else {
+            return solution;
+          }
+        };
+      };
+      return null;
+    };
+  };
+  
+  checkEmpty(puzzle) {
+    const result = puzzle.includes(0);
+    return !result;
+  };
+  
+  validateSection(puzzle, index) {
+    return (this.row(puzzle, index) 
+    && this.col(puzzle, index) 
+    && this.region(puzzle, index)) ? true : false;
+  };
+  
+  checkDuplicate(array, element) {
+    for (let i = 0; i < array.length; i++) {
+      if(element !== 0 && array[i] == element) {
+        return true;
+      };
+    };
+    return false;
+  };
+  
+  row(puzzle, index) {
+    const rowIndex = Math.floor(index/9);
+    const start = rowIndex*9;
+    let store =[];
+    for(let j = 0; j < 9; j++) {
+      let duplicate = this.checkDuplicate(store, puzzle[start + j]);
+      if(duplicate) {
+        return false;
+      };
+      store.push(puzzle[start + j]);
+    };
+    return true;
+  };
+  
+  col(puzzle, index) {
+    const colIndex = index % 9;
+    let store =[];
+    for(let j = 0; j < puzzle.length; j += 9) {
+      let duplicate = this.checkDuplicate(store, puzzle[colIndex + j]);
+      if(duplicate) {
+        return false;
+      };
+      store.push(puzzle[colIndex + j]);
+    };
+    return true;
+  };
+  
+  getIndex(row, column) {
+    let index;
+    switch(row) {
+      case 0:
+        index = 0;
+        break;
+      case 1:
+        index = 27;
+        break;
+      case 2:
+        index = 54;
+        break;
+    };
+  
+    switch(column) {
+      case 0:
+        return index;
+      case 1:
+        return index += 3;
+      case 2:
+        return index += 6;
+    };
+  };
+  
+  region(puzzle, index) {
+    const rowGroup = Math.floor((index /9) / 3);
+    const colGroup = Math.floor((index % 9) /3);
+    const start = this.getIndex(rowGroup, colGroup);
+    let store =[];
+    for(let i = 0; i <= 18; i += 9) {
+      for(let j = 0; j < 3; j++) {
+        let duplicate = this.checkDuplicate(store, puzzle[start + j + i]);
+        if(duplicate) {
+          return false;
+        }
+        store.push(puzzle[start + j + i]);
+      }
+    };
+    return true;
+  };  
+
+
+  // Individual search
   findMatching(group, value) {
     for(let i = 0; i < group.length; i++) {
       if(group[i] !== '.') {
@@ -11,20 +160,9 @@ class SudokuSolver {
       }
     };
     return true;
-  }
-
-  findMatchingObj(group, input) {
-    for(let i = 0; i < input.length; i++) {
-      if(input[i] !== '.') {
-        if(group[i] !== input[i]) {
-          return false;
-        }
-      }
-    };
-    return true;
   };
 
-  getNumber(row) {
+  getRowNumber(row) {
     switch(row) {
       case 'A':
         return 0;
@@ -47,41 +185,20 @@ class SudokuSolver {
     };
   };
 
-  validate(puzzleString, checking) {
-    if(!puzzleString) {
-      return ({ result: false, message: 'Required field missing' });
+  validateInput(row, column, value) {
+    const regNum = /^[0-9]+$/;
+    const regAlpha = /^[a-zA-Z]$/;
+    if(!regAlpha.test(row) || !regNum.test(column)) {
+      return ({ result: false, message: 'Invalid coordinate'});
     };
-    if(puzzleString.length !== 81) {
-      return ({ result: false, message: 'Expected puzzle to be 81 characters long'});
+    if(!regNum.test(value)) {
+      return ({ result: false, message: 'Invalid value' });
     };
-    const reg = /^[0-9\.]+$/;
-    if(!reg.test(puzzleString)) {
-      return ({ result: false, message: 'Invalid characters in puzzle'});
-    };
-    if(checking) {
-      return ({result: true});
-    }
-
-    for(let i = 0; i < puzzleData.length; i++) {
-      let matched = this.findMatchingObj(puzzleData[i][1], puzzleString);
-      if(matched) {
-        return ({ result: true }); 
-      } 
-    };
-    return ({ result: false, message: 'Puzzle cannot be solved'});
-  }
-
-  solve(puzzleString) {
-    for(let i = 0; i < puzzleData.length; i++) {
-      let matched = this.findMatchingObj(puzzleData[i][1], puzzleString);
-      if(matched) {
-        return puzzleData[i][1]; 
-      } 
-    };
-  }
+    return ({ result: true});
+  };
 
   checkRowPlacement(puzzleString, row, column, value) {
-    const numberRow = this.getNumber(row);
+    const numberRow = this.getRowNumber(row);
     const start = (numberRow === 0) ? 0 : numberRow*9;
     const targetRow = puzzleString.slice(start, start + 9);
 
@@ -98,35 +215,14 @@ class SudokuSolver {
     };
 
     return this.findMatching(targetColumn, value);
-  }
-
-  findIndex(row, column) {
-    let index;
-    switch(row) {
-      case 'A': case 'B': case 'C':
-        index = 0;
-        break;
-      case 'D': case 'E': case 'F':
-        index = 27;
-        break;
-      case 'G': case 'H': case 'I':
-        index = 54;
-        break;
-    }
-
-    switch(column) {
-      case '1': case '2': case '3':
-        return index;
-      case '4': case '5': case '6':
-        return index += 3;
-      case '7': case '8': case '9':
-        return index += 6;
-    }
   };
 
+  
   checkRegionPlacement(puzzleString, row, column, value) {
-
-    let startIndex = this.findIndex(row, column);
+    const rowIndex = this.getRowNumber(row);
+    const rowGroup = Math.floor(rowIndex / 3);
+    const colGroup = Math.floor(column / 3);
+    const startIndex = this.getIndex(rowGroup, colGroup);
     let targetColumn = '';
     for(let i = 0; i < 3; i++) {
       let times = i*9;
@@ -136,7 +232,7 @@ class SudokuSolver {
     };
 
     return this.findMatching(targetColumn, value);
-  }
+  };
 
 }
 

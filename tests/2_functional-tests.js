@@ -139,6 +139,8 @@ suite('Functional Tests', () => {
           assert.isBoolean(res.body.valid, false);
           assert.property(res.body, 'conflict');
           assert.lengthOf(res.body.conflict, 2);
+          assert.include(res.body.conflict, 'column');
+          assert.include(res.body.conflict, 'region');
           done();
         });
       });
@@ -158,6 +160,9 @@ suite('Functional Tests', () => {
           assert.isBoolean(res.body.valid, false);
           assert.property(res.body, 'conflict');
           assert.lengthOf(res.body.conflict, 3);
+          assert.include(res.body.conflict, 'column');
+          assert.include(res.body.conflict, 'row');
+          assert.include(res.body.conflict, 'region');
           done();
         });
       });
@@ -172,7 +177,7 @@ suite('Functional Tests', () => {
           assert.equal(res.status, 200);
           assert.isObject(res.body);
           assert.property(res.body, 'error');
-          assert.equal(res.body.error, 'Required field missing');
+          assert.equal(res.body.error, 'Required field(s) missing');
           done();
         });
       });

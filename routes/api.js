@@ -23,7 +23,7 @@ module.exports = function (app) {
     const value = req.body.value;
     const coordinate = req.body.coordinate;
     if(!value || !coordinate) {
-      res.status(200).json({ error: 'Required field missing' });
+      res.status(200).json({ error: 'Required field(s) missing' });
       return;
     };
 

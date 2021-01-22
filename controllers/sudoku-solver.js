@@ -23,8 +23,7 @@ class SudokuSolver {
     let array = [];
     for(let i = 0; i < puzzle.length; i++) {
       if(puzzle[i] == '.') {
-        let zero = parseInt(puzzle[i]);
-        zero = 0;
+        let zero = 0;
         array.push(zero);
       } else {
         let int = parseInt(puzzle[i]);
@@ -150,7 +149,7 @@ class SudokuSolver {
   };  
 
 
-  // Individual search
+  // Individual check
   findMatching(group, value) {
     for(let i = 0; i < group.length; i++) {
       if(group[i] !== '.') {

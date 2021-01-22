@@ -1,46 +1,102 @@
-code {
-  background: #d0d0d5;
-}
-
-.container {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-container {
-  max-width: 95%;
-}
-
-textarea {
+html {
+  height: 100vh;
   width: 100%;
+  margin: 2rem;
+  font-family: 'Fraunces', serif;
 }
-
-#user-stories {
-  font-size: 1.2em;
+header h1{
+  text-align: center;
+  margin-top: 0;
 }
-
-#error-msg {
-  color: red;
-  display: inline;
-  margin-left: 10px;
+main {
+  display: flex;
+  justify-content: center;
+  position: relative;
 }
-
+main::before {
+  content: "";
+  position: absolute;
+  width: 20rem;
+  height: 0.1rem;
+  background-color: rgb(61, 60, 60);
+  top: 0;
+  left: calc(50% - 10rem);
+}
+main::after {
+  content: "";
+  position: absolute;
+  width: 2rem;
+  height: 1.3rem;
+  background-color: rgba(37,23,240);
+  border: 0.5rem solid white;
+  left: calc(50% - 1.2rem);
+  top: -1rem;
+}
+.container {
+  display: grid;
+  grid-template: 
+  "top top" 3rem
+  "right left" auto / 1fr 1fr;
+  grid-gap: 2rem;
+}
+.solve-section {
+  margin-top: 3rem;
+  grid-area: top;
+}
+#solve-form {
+  display: flex;
+  justify-content: center;
+}
+.check-section {
+  margin-top: 2rem;
+  grid-area: right;
+}
 #sudoku-grid {
-  margin-left: 20px;
+  margin-top: 2rem;
   text-align: center;
   display: inline;
+  grid-area: left;
 }
-
+#inline {
+  text-align: left;
+  margin: auto;
+}
+#solve-button {
+  height: 2.5rem;
+  width: 8rem;
+  margin: auto 2rem;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  background-color: rgb(60, 106, 255);
+  color: white;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.19), 0 3px 3px rgba(0,0,0,0.23);
+}
+#check-button {
+  height: 2.5rem;
+  width: 8rem;
+  margin: 2rem auto;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  background-color: rgb(60, 106, 255);
+  color: white;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.19), 0 3px 3px rgba(0,0,0,0.23);
+}
+#solve-button:hover,
+#check-button:hover {
+  opacity: 0.6;
+}
+code {
+  background: #d0d0d5;
+  padding: 0.5rem;
+}
 .grid {
   border: 3px solid;
   border-spacing: 0;
 }
-
 td {
   border: 1px solid;
   padding: 0.3em;
 }
-
 .sudoku-input {
   border: 1px solid black;
   width: 2em;
@@ -56,12 +112,40 @@ td {
   border-right: 3px solid;
 }
 
-@media (min-width: 800px) {
-  .container {
-    flex-direction: row;
+@media (max-width: 800px) {
+  html {
+    margin: 0;
   }
-
-  .form-container {
-    align-self: flex-end;
+  .container {
+    display: grid;
+    grid-template: 
+      'top top'
+      'right right'
+      'left left' auto/ 1fr 1fr;
+    grid-gap: 1rem;
+  } 
+  #solve-form {
+    display: grid;
+  }
+  #solve-button {
+    margin: 1rem auto;
+  }
+  #text-input {
+    height: 3rem;
+  }
+  #inline {
+    text-align: center;
+  }
+  .checker {
+    display: block;
+    margin: 0 auto;
+  }
+  #check-button {
+    display: block;
+    margin: 1rem auto;
+  }
+  #sudoku-grid {
+    display: flex;
+    justify-content: center;
   }
 }

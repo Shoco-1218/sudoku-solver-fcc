@@ -28,7 +28,7 @@ main::after {
   position: absolute;
   width: 2rem;
   height: 1.3rem;
-  background-color: rgba(37,23,240);
+  background-color: rgb(60, 106, 255);
   border: 0.5rem solid white;
   left: calc(47%);
   top: -1rem;
